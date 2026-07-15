@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@layer base {
+  button {
+    @apply px-4 h-8 rounded-md cursor-pointer text-sm;
+  }
+}
+
+body {
+  font-family: "Roboto", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings: "wdth" 100;
+}
+
+.fraunces {
+  font-family: "Fraunces", serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  font-variation-settings:
+    "SOFT" 0,
+    "WONK" 0;
+}
