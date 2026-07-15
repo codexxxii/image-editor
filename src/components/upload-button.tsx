@@ -1,16 +1,29 @@
 import Dropzone, { type FileRejection } from "react-dropzone";
+import { useContext } from "@/lib/use-context";
+import { toast } from "sonner";
 
 export default function UploadButton({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { handleImages } = useContext();
+
   const onDropAccepted = (acceptedFiles: File[]) => {
-    console.log(acceptedFiles);
+    const images = acceptedFiles.map((image) => {
+      const data = {
+        id: crypto.randomUUID(),
+        url: URL.createObjectURL(image),
+      };
+      return data;
+    });
+    handleImages(images);
   };
 
   const onDropRejected = (rejectedFiles: FileRejection[]) => {
-    console.log(rejectedFiles);
+    toast.error(
+      `File upload error, file type ${rejectedFiles[0].file.type} not supported.`,
+    );
   };
 
   const accept = {

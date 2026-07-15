@@ -1,5 +1,20 @@
 import { create } from "zustand";
 
-type ContextProps = {};
+type Image = {
+  id: string;
+  url: string;
+};
 
-export const useContext = create<ContextProps>((set) => ({}));
+type ContextProps = {
+  images: Image[];
+  handleImages: (images: Image[]) => void;
+  isActive: boolean;
+  handleIsActive: (isActive: boolean) => void;
+};
+
+export const useContext = create<ContextProps>((set) => ({
+  images: [],
+  handleImages: (images) => set({ images }),
+  isActive: false,
+  handleIsActive: (isActive) => set({ isActive }),
+}));
