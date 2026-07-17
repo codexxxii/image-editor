@@ -7,17 +7,59 @@ export default function UploadButton({
 }: {
   children: React.ReactNode;
 }) {
-  const { handleImages } = useContext();
+  const { handleImages, handleActiveImage } = useContext();
 
-  const onDropAccepted = (acceptedFiles: File[]) => {
-    const images = acceptedFiles.map((image) => {
-      const data = {
-        id: crypto.randomUUID(),
-        url: URL.createObjectURL(image),
+  function getImageDimensions(url: string) {
+    return new Promise<{
+      width: number;
+      height: number;
+    }>((resolve) => {
+      const image = new Image();
+
+      image.onload = () => {
+        resolve({
+          width: image.width,
+          height: image.height,
+        });
       };
-      return data;
+
+      image.src = url;
     });
-    handleImages(images);
+  }
+
+  const onDropAccepted = async (files: File[]) => {
+    const uploadedImages = await Promise.all(
+      files.map(async (file) => {
+        const url = URL.createObjectURL(file);
+
+        const dimensions = await getImageDimensions(url);
+
+        return {
+          id: crypto.randomUUID(),
+          url,
+
+          width: dimensions.width,
+          height: dimensions.height,
+
+          crop: {
+            x: 0,
+            y: 0,
+          },
+
+          zoom: 1,
+          rotation: 0,
+
+          printSize: {
+            id: "4x6",
+            width: 4,
+            height: 6,
+          },
+        };
+      }),
+    );
+
+    handleActiveImage(uploadedImages[0].url);
+    handleImages(uploadedImages);
   };
 
   const onDropRejected = (rejectedFiles: FileRejection[]) => {

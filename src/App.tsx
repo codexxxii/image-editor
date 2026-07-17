@@ -20,11 +20,13 @@ export default function App() {
         <header className="w-full h-20">
           <MaxWidthWrapper className="h-full flex justify-between items-center">
             <p className="text-4xl font-bold tracking-tighter">Luma</p>
-            <UploadButton>
-              <button className="px-0! w-8 grid place-items-center bg-black text-white">
-                <ImagePlus size={17} />
-              </button>
-            </UploadButton>
+            {images.length < 1 && (
+              <UploadButton>
+                <button className="px-0! w-8 grid place-items-center bg-black text-white">
+                  <ImagePlus size={17} />
+                </button>
+              </UploadButton>
+            )}
           </MaxWidthWrapper>
         </header>
         {images.length > 0 ? <Editor /> : <Hero />}
