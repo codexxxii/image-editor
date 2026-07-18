@@ -1,50 +1,92 @@
+import { type Area, type Point } from "react-easy-crop";
 import { create } from "zustand";
+
+export type PrintSize = {
+  id: string;
+  label: string;
+  width: number;
+  height: number;
+};
 
 export type Image = {
   id: string;
   url: string;
+
   width: number;
   height: number;
-  crop: {
-    x: number;
-    y: number;
-  };
-  zoom: number;
-  rotation: number;
-  croppedAreaPixels?: {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-  };
-  size?: {
-    id: string;
-    width: number; // inches
-    height: number; // inches
-  };
-  output?: {
-    width: number; // pixels
-    height: number; // pixels
-    dpi: number;
-  };
 
-  croppedUrl?: string; // final generated image
+  editor: {
+    crop: Point;
+    zoom: number;
+    rotation: number;
+
+    croppedAreaPixels: Area | null;
+
+    printSize: PrintSize;
+
+    confirmed: boolean;
+  };
 };
 
 type ContextProps = {
   images: Image[];
-  handleImages: (images: Image[]) => void;
+
+  activeImageId: string | null;
+
   isActive: boolean;
-  handleIsActive: (isActive: boolean) => void;
-  activeImage: string | null;
-  handleActiveImage: (activeImage: string) => void;
+
+  setImages: (images: Image[]) => void;
+
+  updateImage: (id: string, updates: Partial<Image["editor"]>) => void;
+
+  setActiveImage: (id: string) => void;
+
+  setIsActive: (value: boolean) => void;
+
+  reset: () => void;
 };
 
 export const useContext = create<ContextProps>((set) => ({
   images: [],
-  handleImages: (images) => set({ images }),
+
+  activeImageId: null,
+
   isActive: false,
-  handleIsActive: (isActive) => set({ isActive }),
-  activeImage: null,
-  handleActiveImage: (activeImage) => set({ activeImage: activeImage }),
+
+  setImages: (images) =>
+    set({
+      images,
+    }),
+
+  updateImage: (id, updates) =>
+    set((state) => ({
+      images: state.images.map((image) =>
+        image.id === id
+          ? {
+              ...image,
+              editor: {
+                ...image.editor,
+                ...updates,
+              },
+            }
+          : image,
+      ),
+    })),
+
+  setActiveImage: (id) =>
+    set({
+      activeImageId: id,
+    }),
+
+  setIsActive: (value) =>
+    set({
+      isActive: value,
+    }),
+
+  reset: () =>
+    set({
+      images: [],
+      activeImageId: null,
+      isActive: false,
+    }),
 }));

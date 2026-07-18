@@ -1,5 +1,5 @@
 import Dropzone, { type FileRejection } from "react-dropzone";
-import { useContext } from "@/lib/use-context";
+import { useContext, type Image } from "@/lib/use-context";
 import { toast } from "sonner";
 
 export default function UploadButton({
@@ -7,7 +7,7 @@ export default function UploadButton({
 }: {
   children: React.ReactNode;
 }) {
-  const { handleImages, handleActiveImage } = useContext();
+  const { setImages, setActiveImage } = useContext();
 
   function getImageDimensions(url: string) {
     return new Promise<{
@@ -28,7 +28,7 @@ export default function UploadButton({
   }
 
   const onDropAccepted = async (files: File[]) => {
-    const uploadedImages = await Promise.all(
+    const uploadedImages: Image[] = await Promise.all(
       files.map(async (file) => {
         const url = URL.createObjectURL(file);
 
@@ -41,25 +41,33 @@ export default function UploadButton({
           width: dimensions.width,
           height: dimensions.height,
 
-          crop: {
-            x: 0,
-            y: 0,
-          },
+          editor: {
+            crop: {
+              x: 0,
+              y: 0,
+            },
 
-          zoom: 1,
-          rotation: 0,
+            zoom: 1,
 
-          printSize: {
-            id: "4x6",
-            width: 4,
-            height: 6,
+            rotation: 0,
+
+            croppedAreaPixels: null,
+
+            printSize: {
+              id: "4x6",
+              label: "4 × 6 in",
+              width: 4,
+              height: 6,
+            },
+
+            confirmed: false,
           },
         };
       }),
     );
 
-    handleActiveImage(uploadedImages[0].url);
-    handleImages(uploadedImages);
+    setImages(uploadedImages);
+    setActiveImage(uploadedImages[0].id);
   };
 
   const onDropRejected = (rejectedFiles: FileRejection[]) => {
