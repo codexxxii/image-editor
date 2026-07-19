@@ -6,7 +6,7 @@ import { useContext } from "@/lib/use-context";
 import Modal from "./modal";
 
 export default function Hero() {
-  const { isActive, handleIsActive } = useContext();
+  const { isActive, setIsActive } = useContext();
 
   return (
     <>
@@ -43,7 +43,7 @@ export default function Hero() {
 
             <button
               className="border backdrop-blur"
-              onClick={() => handleIsActive(true)}
+              onClick={() => setIsActive(true)}
             >
               Learn More
             </button>
@@ -110,9 +110,7 @@ export default function Hero() {
           </div>
         </motion.div>
       </MaxWidthWrapper>
-      {isActive && (
-        <Modal open={isActive} onClose={() => handleIsActive(false)} />
-      )}
+      {isActive && <Modal open={isActive} onClose={() => setIsActive(false)} />}
     </>
   );
 }

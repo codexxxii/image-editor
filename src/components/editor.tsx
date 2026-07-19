@@ -5,9 +5,10 @@ import { useContext } from "@/lib/use-context";
 import { useEffect, useState } from "react";
 import { PRINT_SIZES } from "@/lib/utils";
 import { RotateCwIcon } from "lucide-react";
+import { getCroppedImage } from "@/lib/helpers";
 
 export default function Editor() {
-  const { images, activeImageId, updateImage } = useContext();
+  const { images, activeImageId } = useContext();
 
   const activeImage = images.find((image) => image.id === activeImageId);
 
@@ -18,6 +19,8 @@ export default function Editor() {
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
   const [printSize, setPrintSize] = useState(PRINT_SIZES[0]);
+
+  const [preview, setPreview] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activeImage) return;
@@ -33,9 +36,7 @@ export default function Editor() {
     setCroppedAreaPixels(area);
   };
 
-  const rotateCrop = () => {
-    setRotation((prev) => (prev + 90) % 360);
-
+  const rotateAspect = () => {
     setPrintSize((prev) => ({
       ...prev,
       width: prev.height,
@@ -43,25 +44,16 @@ export default function Editor() {
     }));
   };
 
-  // const rotateAspect = () => {
-  //     setSelectedSize((prev) => ({
-  //         ...prev,
-  //         width: prev.height,
-  //         height: prev.width,
-  //     }));
-  // };
-
-  const handleCrop = () => {
+  const handleCrop = async () => {
     if (!activeImage || !croppedAreaPixels) return;
 
-    updateImage(activeImage.id, {
-      crop,
-      zoom,
-      rotation,
+    const image = await getCroppedImage(
+      activeImage.url,
       croppedAreaPixels,
-      printSize,
-      confirmed: true,
-    });
+      rotation,
+    );
+
+    setPreview(image);
   };
 
   if (!activeImage) return null;
@@ -70,7 +62,7 @@ export default function Editor() {
     <MaxWidthWrapper className="min-h-[calc(100vh-80px)] py-15 space-y-10">
       <Carousel images={images} />
 
-      <div className="w-full h-200 relative rounded-xl overflow-hidden">
+      <div className="w-full h-150 relative rounded-xl overflow-hidden">
         <Cropper
           image={activeImage.url}
           aspect={printSize.width / printSize.height}
@@ -99,26 +91,42 @@ export default function Editor() {
           </select>
 
           <button
-            onClick={rotateCrop}
-            className="px-0! w-8 grid place-items-center bg-black text-white"
+            onClick={rotateAspect}
+            className="flex items-center gap-2 bg-black text-white"
           >
-            <RotateCwIcon size={17} />
+            <RotateCwIcon size={15} className="-translate-y-px" />
+            Aspect
           </button>
+          <div className="flex items-center gap-1">
+            <p>Rotate:</p>
+            <input
+              type="range"
+              min={1}
+              max={360}
+              step={1}
+              value={rotation}
+              onChange={(e) => setRotation(Number(e.target.value))}
+            />
+          </div>
 
-          <input
-            type="range"
-            min={1}
-            max={10}
-            step={0.05}
-            value={zoom}
-            onChange={(e) => setZoom(Number(e.target.value))}
-          />
+          <div className="flex items-center gap-1">
+            <p>Zoom:</p>
+            <input
+              type="range"
+              min={1}
+              max={10}
+              step={0.05}
+              value={zoom}
+              onChange={(e) => setZoom(Number(e.target.value))}
+            />
+          </div>
         </div>
 
         <button onClick={handleCrop} className="text-white bg-black">
           Crop
         </button>
       </div>
+      {preview && <img src={preview} className="w-60 rounded-lg" />}
     </MaxWidthWrapper>
   );
 }
