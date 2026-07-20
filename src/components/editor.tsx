@@ -1,83 +1,81 @@
-import Cropper, { type Area } from "react-easy-crop";
+import { useContext } from "@/lib/use-context";
 import Carousel from "./carousel";
 import MaxWidthWrapper from "./max-width-wrapper";
-import { useContext } from "@/lib/use-context";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import Cropper from "react-easy-crop";
+import { type Point, type Area } from "react-easy-crop";
 import { PRINT_SIZES } from "@/lib/utils";
-import { RotateCwIcon } from "lucide-react";
+import { DotIcon } from "lucide-react";
 import { getCroppedImage } from "@/lib/helpers";
 
 export default function Editor() {
-  const { images, activeImageId } = useContext();
+  const { images, setImages, activeImage } = useContext();
 
-  const activeImage = images.find((image) => image.id === activeImageId);
-
-  const [crop, setCrop] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
+  const [crop, setCrop] = useState<Point>({ x: 0, y: 0 });
+  const [printSize, setPrintSize] = useState(PRINT_SIZES[0]);
   const [rotation, setRotation] = useState(0);
-
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
 
-  const [printSize, setPrintSize] = useState(PRINT_SIZES[0]);
-
-  const [preview, setPreview] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!activeImage) return;
-
-    setCrop(activeImage.editor.crop);
-    setZoom(activeImage.editor.zoom);
-    setRotation(activeImage.editor.rotation);
-    setPrintSize(activeImage.editor.printSize);
-    setCroppedAreaPixels(activeImage.editor.croppedAreaPixels);
-  }, [activeImage]);
-
-  const onCropComplete = (_: Area, area: Area) => {
-    setCroppedAreaPixels(area);
+  const onCropComplete = (_: Area, croppedAreaPixels: Area) => {
+    setCroppedAreaPixels(croppedAreaPixels);
   };
 
-  const rotateAspect = () => {
+  const rotateCrop = () => {
+    setRotation((prev) => (prev + 90) % 360);
+
     setPrintSize((prev) => ({
       ...prev,
       width: prev.height,
       height: prev.width,
     }));
+
+    return rotation;
   };
 
   const handleCrop = async () => {
     if (!activeImage || !croppedAreaPixels) return;
 
-    const image = await getCroppedImage(
-      activeImage.url,
+    const croppedImageUrl = await getCroppedImage(
+      activeImage.imageUrl,
       croppedAreaPixels,
       rotation,
     );
 
-    setPreview(image);
-    console.log(image);
+    const updatedImages = images.map((image) => {
+      if (image.id === activeImage.id) {
+        const img = {
+          ...image,
+          editor: {
+            printSize,
+            croppedAreaPixels,
+            croppedUrl: croppedImageUrl,
+          },
+        };
+        return img;
+      }
+      return image;
+    });
+
+    setImages(updatedImages);
   };
 
-  if (!activeImage) return null;
-
   return (
-    <MaxWidthWrapper className="min-h-[calc(100vh-80px)] py-15 space-y-10">
+    <MaxWidthWrapper className="py-15 space-y-5">
       <Carousel images={images} />
-
-      <div className="w-full h-150 relative rounded-xl overflow-hidden">
+      <div className="w-full h-150 rounded-lg relative overflow-hidden">
         <Cropper
-          image={activeImage.url}
+          image={activeImage?.imageUrl}
+          zoom={zoom}
+          onZoomChange={setZoom}
           aspect={printSize.width / printSize.height}
           crop={crop}
-          zoom={zoom}
-          rotation={rotation}
           onCropChange={setCrop}
-          onZoomChange={setZoom}
           onCropComplete={onCropComplete}
         />
       </div>
-
-      <div className="flex items-center justify-between p-4">
-        <div className="flex items-center gap-10">
+      <div className="w-full flex justify-between items-center">
+        <div className="flex items-center gap-5">
           <select
             value={printSize.id}
             onChange={(e) =>
@@ -85,21 +83,17 @@ export default function Editor() {
             }
           >
             {PRINT_SIZES.map((size) => (
-              <option key={size.id} value={size.id}>
+              <option value={size.id} key={size.id}>
                 {size.label}
               </option>
             ))}
           </select>
-
-          <button
-            onClick={rotateAspect}
-            className="flex items-center gap-2 bg-black text-white"
-          >
-            <RotateCwIcon size={15} className="-translate-y-px" />
-            Aspect
+          <DotIcon />
+          <button className="bg-black text-white" onClick={rotateCrop}>
+            Rotate Aspect
           </button>
-
-          <div className="flex items-center gap-1">
+          <DotIcon />
+          <div className="flex items-center gap-2">
             <p>Zoom:</p>
             <input
               type="range"
@@ -111,12 +105,10 @@ export default function Editor() {
             />
           </div>
         </div>
-
-        <button onClick={handleCrop} className="text-white bg-black">
+        <button className="bg-black text-white" onClick={handleCrop}>
           Crop
         </button>
       </div>
-      {preview && <img src={preview} className="w-60 rounded-lg" />}
     </MaxWidthWrapper>
   );
 }

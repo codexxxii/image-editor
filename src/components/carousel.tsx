@@ -36,12 +36,12 @@ export default function Carousel({ images }: Props) {
       >
         {images.map((image, index) => (
           <div
-            onClick={() => setActiveImage(image.id)}
+            onClick={() => setActiveImage(image)}
             key={index}
             className="h-40 min-w-[calc((100%-2rem)/5)] shrink-0 overflow-hidden rounded-lg"
           >
             <img
-              src={image.url}
+              src={image.imageUrl}
               alt={`Image ${index + 1}`}
               className="h-full w-full object-cover"
             />

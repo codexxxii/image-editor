@@ -1,4 +1,4 @@
-import { type Area, type Point } from "react-easy-crop";
+import type { Area } from "react-easy-crop";
 import { create } from "zustand";
 
 export type PrintSize = {
@@ -10,86 +10,30 @@ export type PrintSize = {
 
 export type Image = {
   id: string;
-  url: string;
-
+  imageUrl: string;
   width: number;
   height: number;
-
-  croppedUrl: string | null;
-
   editor: {
-    crop: Point;
-    zoom: number;
-    rotation: number;
-
+    printSize: PrintSize | null;
+    croppedUrl: string | null;
     croppedAreaPixels: Area | null;
-
-    printSize: PrintSize;
-
-    confirmed: boolean;
   };
 };
 
 type ContextProps = {
   images: Image[];
-
-  activeImageId: string | null;
-
-  isActive: boolean;
-
   setImages: (images: Image[]) => void;
-
-  updateImage: (id: string, updates: Partial<Image>) => void;
-
-  setActiveImage: (id: string) => void;
-
-  setIsActive: (value: boolean) => void;
-
-  reset: () => void;
+  isActive: boolean;
+  setIsActive: (isActive: boolean) => void;
+  activeImage: Image | null;
+  setActiveImage: (image: Image) => void;
 };
 
 export const useContext = create<ContextProps>((set) => ({
   images: [],
-
-  activeImageId: null,
-
+  setImages: (images) => set({ images }),
   isActive: false,
-
-  setImages: (images) =>
-    set({
-      images,
-    }),
-
-  updateImage: (id, updates) =>
-    set((state) => ({
-      images: state.images.map((image) =>
-        image.id === id
-          ? {
-              ...image,
-              ...updates,
-              editor: {
-                ...image.editor,
-                ...updates.editor,
-              },
-            }
-          : image,
-      ),
-    })),
-
-  setActiveImage: (id) =>
-    set({
-      activeImageId: id,
-    }),
-
-  setIsActive: (value) =>
-    set({
-      isActive: value,
-    }),
-
-  reset: () =>
-    set({
-      images: [],
-      activeImageId: null,
-      isActive: false,
-    }),
+  setIsActive: (isActive) => set({ isActive }),
+  activeImage: null,
+  setActiveImage: (image) => set({ activeImage: image }),
 }));
