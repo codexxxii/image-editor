@@ -54,6 +54,7 @@ export default function Editor() {
     );
 
     setPreview(image);
+    console.log(image);
   };
 
   if (!activeImage) return null;
@@ -97,17 +98,6 @@ export default function Editor() {
             <RotateCwIcon size={15} className="-translate-y-px" />
             Aspect
           </button>
-          <div className="flex items-center gap-1">
-            <p>Rotate:</p>
-            <input
-              type="range"
-              min={1}
-              max={360}
-              step={1}
-              value={rotation}
-              onChange={(e) => setRotation(Number(e.target.value))}
-            />
-          </div>
 
           <div className="flex items-center gap-1">
             <p>Zoom:</p>

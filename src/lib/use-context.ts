@@ -15,6 +15,8 @@ export type Image = {
   width: number;
   height: number;
 
+  croppedUrl: string | null;
+
   editor: {
     crop: Point;
     zoom: number;
@@ -37,7 +39,7 @@ type ContextProps = {
 
   setImages: (images: Image[]) => void;
 
-  updateImage: (id: string, updates: Partial<Image["editor"]>) => void;
+  updateImage: (id: string, updates: Partial<Image>) => void;
 
   setActiveImage: (id: string) => void;
 
@@ -64,9 +66,10 @@ export const useContext = create<ContextProps>((set) => ({
         image.id === id
           ? {
               ...image,
+              ...updates,
               editor: {
                 ...image.editor,
-                ...updates,
+                ...updates.editor,
               },
             }
           : image,

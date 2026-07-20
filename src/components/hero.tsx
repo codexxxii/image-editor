@@ -42,7 +42,7 @@ export default function Hero() {
             </UploadButton>
 
             <button
-              className="border backdrop-blur"
+              className="backdrop-blur bg-gray-100"
               onClick={() => setIsActive(true)}
             >
               Learn More

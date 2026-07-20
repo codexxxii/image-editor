@@ -14,7 +14,7 @@ function createImage(src: string): Promise<HTMLImageElement> {
 export async function getCroppedImage(
   imageSrc: string,
   crop: Area,
-  rotation = 0,
+  rotation: number,
 ): Promise<string> {
   const image = await createImage(imageSrc);
 

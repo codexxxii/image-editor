@@ -10,8 +10,6 @@ export default function Carousel({ images }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { setActiveImage } = useContext();
 
-  console.log(images);
-
   const scroll = (direction: "left" | "right") => {
     if (!containerRef.current) return;
 
