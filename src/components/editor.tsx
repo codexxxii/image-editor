@@ -18,7 +18,6 @@ export default function Editor() {
   const [rotation, setRotation] = useState(0);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [croppedImages, setCroppedImages] = useState<Image[]>([]);
-  const [downloading, setDownloading] = useState(false);
 
   const onCropComplete = (_: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -157,8 +156,7 @@ export default function Editor() {
           </div>
           <div className="w-full flex justify-end items-center">
             <button
-              disabled={downloading!}
-              className="h-10! text-lg bg-linear-to-tr from-indigo-400 via-indigo-500 to-indigo-600 text-white hover:brightness-120 transition-all ease-in-out duration-300 disabled:opacity-50"
+              className="h-10! text-lg bg-linear-to-tr from-indigo-400 via-indigo-500 to-indigo-600 text-white hover:brightness-120 transition-all ease-in-out duration-300"
               onClick={() => downloadImages(croppedImages)}
             >
               Download
