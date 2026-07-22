@@ -11,12 +11,18 @@ export type PrintSize = {
 export type Image = {
   id: string;
   imageUrl: string;
+  croppedImageId?: string;
   width: number;
   height: number;
   editor: {
     printSize: PrintSize | null;
     croppedUrl: string | null;
     croppedAreaPixels: Area | null;
+    adjustments: {
+      brightness: number;
+      contrast: number;
+      saturation: number;
+    };
   };
 };
 

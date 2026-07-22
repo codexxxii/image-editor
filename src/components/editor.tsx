@@ -5,7 +5,7 @@ import { useState } from "react";
 import Cropper from "react-easy-crop";
 import { type Point, type Area } from "react-easy-crop";
 import { PRINT_SIZES } from "@/lib/utils";
-import { DotIcon } from "lucide-react";
+import { DotIcon, XIcon } from "lucide-react";
 import { exportImages, getCroppedImage } from "@/lib/helpers";
 import { toast } from "sonner";
 
@@ -18,6 +18,9 @@ export default function Editor() {
   const [rotation, setRotation] = useState(0);
   const [croppedAreaPixels, setCroppedAreaPixels] = useState<Area | null>(null);
   const [croppedImages, setCroppedImages] = useState<Image[]>([]);
+  const [brightness, setBrightness] = useState(100);
+  const [saturation, setSaturation] = useState(100);
+  const [contrast, setContrast] = useState(100);
 
   const onCropComplete = (_: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -41,16 +44,27 @@ export default function Editor() {
     const croppedImageUrl = await getCroppedImage(
       activeImage.imageUrl,
       croppedAreaPixels,
+      {
+        brightness,
+        contrast,
+        saturation,
+      },
     );
 
     const updatedImages = images.map((image) => {
       if (image.id === activeImage.id) {
         const img = {
           ...image,
+          croppedImageId: crypto.randomUUID(),
           editor: {
             printSize: printSize,
             croppedAreaPixels: croppedAreaPixels,
             croppedUrl: croppedImageUrl,
+            adjustments: {
+              brightness,
+              contrast,
+              saturation,
+            },
           },
         };
         setCroppedImages([...croppedImages].concat(img));
@@ -62,8 +76,15 @@ export default function Editor() {
     setImages(updatedImages);
   };
 
-  async function downloadImages(images: Image[]) {
-    await toast.promise(
+  const removeImage = (imageId: string) => {
+    const filteredImages = croppedImages.filter(
+      (image) => image.croppedImageId !== imageId,
+    );
+    setCroppedImages(filteredImages);
+  };
+
+  function downloadImages(images: Image[]) {
+    toast.promise(
       (async () => {
         const blobs = await exportImages(images);
 
@@ -101,6 +122,14 @@ export default function Editor() {
           crop={crop}
           onCropChange={setCrop}
           onCropComplete={onCropComplete}
+          style={{
+            mediaStyle: {
+              filter: `
+              brightness(${brightness}%)
+              contrast(${contrast}%)
+              saturate(${saturation}%)`,
+            },
+          }}
         />
       </div>
       <div className="w-full flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -143,8 +172,47 @@ export default function Editor() {
               onChange={(e) => setZoom(Number(e.target.value))}
             />
           </div>
-        </div>
+          <div className="flex w-full sm:w-auto items-center gap-2">
+            <p className="shrink-0">Brightness:</p>
+            <input
+              className="flex-1 sm:w-48"
+              type="range"
+              min={0}
+              max={200}
+              step={0.05}
+              value={brightness}
+              onChange={(e) => setBrightness(Number(e.target.value))}
+            />
+          </div>
+          <div className="flex w-full sm:w-auto items-center gap-2">
+            <p className="shrink-0">Contrast:</p>
 
+            <input
+              className="flex-1 sm:w-48"
+              type="range"
+              min={0}
+              max={200}
+              step={0.05}
+              value={contrast}
+              onChange={(e) => setContrast(Number(e.target.value))}
+            />
+          </div>
+          <div className="flex w-full sm:w-auto items-center gap-2">
+            <p className="shrink-0">Saturation:</p>
+
+            <input
+              className="flex-1 sm:w-48"
+              type="range"
+              min={0}
+              max={200}
+              step={0.05}
+              value={saturation}
+              onChange={(e) => setSaturation(Number(e.target.value))}
+            />
+          </div>
+        </div>
+      </div>
+      <div className="w-full flex justify-end items-center">
         <button
           className="bg-black text-white w-full md:w-auto"
           onClick={handleCrop}
@@ -152,14 +220,21 @@ export default function Editor() {
           Crop
         </button>
       </div>
+      <div className="flex flex-wrap gap-4 md:gap-5"></div>
       {croppedImages.length > 0 && (
         <>
           <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2 place-items-start">
             {croppedImages.map((image, index) => (
               <div
                 key={index}
-                className="w-full rounded-md overflow-hidden h-40"
+                className="w-full rounded-md overflow-hidden h-40 relative"
               >
+                <button
+                  className="h-5! p-0! aspect-square grid place-items-center absolute top-1.5 right-1.5"
+                  onClick={() => removeImage(image.croppedImageId!)}
+                >
+                  <XIcon size={17} className="text-red-500" />
+                </button>
                 <img
                   src={image.editor.croppedUrl!}
                   alt=""

@@ -17,6 +17,7 @@ function createImage(src: string): Promise<HTMLImageElement> {
 export async function getCroppedImage(
   imageSrc: string,
   crop: Area,
+  adjustments: { brightness: number; contrast: number; saturation: number },
 ): Promise<string> {
   const image = await createImage(imageSrc);
 
@@ -28,18 +29,20 @@ export async function getCroppedImage(
 
   ctx.save();
 
-  // Move canvas origin to center
-  ctx.translate(canvas.width / 2, canvas.height / 2);
+  ctx.filter = `
+    brightness(${adjustments.brightness}%)
+    contrast(${adjustments.contrast}%)
+    saturate(${adjustments.saturation}%)
+  `;
 
-  // Draw only the selected crop
   ctx.drawImage(
     image,
     crop.x,
     crop.y,
     crop.width,
     crop.height,
-    -crop.width / 2,
-    -crop.height / 2,
+    0,
+    0,
     crop.width,
     crop.height,
   );
@@ -50,7 +53,7 @@ export async function getCroppedImage(
 }
 
 export async function exportImage(image: Image): Promise<Blob> {
-  const { croppedAreaPixels, printSize } = image.editor;
+  const { croppedAreaPixels, printSize, adjustments } = image.editor;
 
   if (!croppedAreaPixels || !printSize) {
     throw new Error("Image has not been cropped.");
@@ -64,6 +67,12 @@ export async function exportImage(image: Image): Promise<Blob> {
 
   cropCanvas.width = croppedAreaPixels.width;
   cropCanvas.height = croppedAreaPixels.height;
+
+  cropCtx.filter = `
+  brightness(${adjustments.brightness}%)
+  contrast(${adjustments.contrast}%)
+  saturate(${adjustments.saturation}%)
+`;
 
   cropCtx.drawImage(
     img,
