@@ -103,13 +103,14 @@ export default function Editor() {
           onCropComplete={onCropComplete}
         />
       </div>
-      <div className="w-full flex justify-between items-center">
-        <div className="flex items-center gap-5">
+      <div className="w-full flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center gap-4 md:gap-5">
           <select
             value={printSize.id}
             onChange={(e) =>
               setPrintSize(PRINT_SIZES.find((s) => s.id === e.target.value)!)
             }
+            className="w-full sm:w-auto"
           >
             {PRINT_SIZES.map((size) => (
               <option value={size.id} key={size.id}>
@@ -117,14 +118,23 @@ export default function Editor() {
               </option>
             ))}
           </select>
-          <DotIcon />
-          <button className="bg-black text-white" onClick={rotateCrop}>
+
+          <DotIcon className="hidden md:block" />
+
+          <button
+            className="bg-black text-white w-full sm:w-auto"
+            onClick={rotateCrop}
+          >
             Rotate Aspect
           </button>
-          <DotIcon />
-          <div className="flex items-center gap-2">
-            <p>Zoom:</p>
+
+          <DotIcon className="hidden md:block" />
+
+          <div className="flex w-full sm:w-auto items-center gap-2">
+            <p className="shrink-0">Zoom:</p>
+
             <input
+              className="flex-1 sm:w-48"
               type="range"
               min={1}
               max={10}
@@ -134,13 +144,17 @@ export default function Editor() {
             />
           </div>
         </div>
-        <button className="bg-black text-white" onClick={handleCrop}>
+
+        <button
+          className="bg-black text-white w-full md:w-auto"
+          onClick={handleCrop}
+        >
           Crop
         </button>
       </div>
       {croppedImages.length > 0 && (
         <>
-          <div className="w-full grid grid-cols-5 gap-2 place-items-start">
+          <div className="w-full grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-2 place-items-start">
             {croppedImages.map((image, index) => (
               <div
                 key={index}
@@ -156,7 +170,7 @@ export default function Editor() {
           </div>
           <div className="w-full flex justify-end items-center">
             <button
-              className="h-10! text-lg bg-linear-to-tr from-indigo-400 via-indigo-500 to-indigo-600 text-white hover:brightness-120 transition-all ease-in-out duration-300"
+              className="w-full md:w-auto h-10! text-lg bg-linear-to-tr from-indigo-400 via-indigo-500 to-indigo-600 text-white hover:brightness-120 transition-all ease-in-out duration-300"
               onClick={() => downloadImages(croppedImages)}
             >
               Download
