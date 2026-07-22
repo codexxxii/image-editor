@@ -1,4 +1,7 @@
 import { type Area } from "react-easy-crop";
+import type { Image } from "./use-context";
+
+const DPI = 300;
 
 function createImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -14,7 +17,6 @@ function createImage(src: string): Promise<HTMLImageElement> {
 export async function getCroppedImage(
   imageSrc: string,
   crop: Area,
-  rotation: number,
 ): Promise<string> {
   const image = await createImage(imageSrc);
 
@@ -28,9 +30,6 @@ export async function getCroppedImage(
 
   // Move canvas origin to center
   ctx.translate(canvas.width / 2, canvas.height / 2);
-
-  // Rotate image
-  ctx.rotate((rotation * Math.PI) / 180);
 
   // Draw only the selected crop
   ctx.drawImage(
@@ -48,4 +47,80 @@ export async function getCroppedImage(
   ctx.restore();
 
   return canvas.toDataURL("image/jpeg");
+}
+
+export async function exportImage(image: Image): Promise<Blob> {
+  const { croppedAreaPixels, printSize } = image.editor;
+
+  if (!croppedAreaPixels || !printSize) {
+    throw new Error("Image has not been cropped.");
+  }
+
+  const img = await createImage(image.imageUrl);
+
+  // Canvas that contains only the cropped area
+  const cropCanvas = document.createElement("canvas");
+  const cropCtx = cropCanvas.getContext("2d")!;
+
+  cropCanvas.width = croppedAreaPixels.width;
+  cropCanvas.height = croppedAreaPixels.height;
+
+  cropCtx.drawImage(
+    img,
+    croppedAreaPixels.x,
+    croppedAreaPixels.y,
+    croppedAreaPixels.width,
+    croppedAreaPixels.height,
+
+    0,
+    0,
+    croppedAreaPixels.width,
+    croppedAreaPixels.height,
+  );
+
+  // Final print canvas
+  const exportCanvas = document.createElement("canvas");
+  const exportCtx = exportCanvas.getContext("2d")!;
+
+  exportCanvas.width = Math.round(printSize.width * DPI);
+  exportCanvas.height = Math.round(printSize.height * DPI);
+
+  exportCtx.drawImage(
+    cropCanvas,
+    0,
+    0,
+    cropCanvas.width,
+    cropCanvas.height,
+
+    0,
+    0,
+    exportCanvas.width,
+    exportCanvas.height,
+  );
+
+  return new Promise((resolve, reject) => {
+    exportCanvas.toBlob(
+      (blob) => {
+        if (!blob) {
+          reject(new Error("Failed to export image."));
+          return;
+        }
+
+        resolve(blob);
+      },
+      "image/jpeg",
+      1,
+    );
+  });
+}
+
+export async function exportImages(images: Image[]) {
+  const blobs: Blob[] = [];
+
+  for (const image of images) {
+    const blob = await exportImage(image);
+    blobs.push(blob);
+  }
+
+  return blobs;
 }

@@ -76,7 +76,7 @@ export default function Hero() {
           <div className="relative h-150 w-130">
             <div className="absolute left-12 top-10 h-105 w-75 overflow-hidden rounded-3xl border border-white/10 bg-zinc-900 shadow-2xl">
               <img
-                src="/hero-image.png"
+                src="/hero-image.svg"
                 alt=""
                 className="h-full w-full object-cover"
               />
