@@ -42,6 +42,12 @@ export default function UploadButton({
             croppedAreaPixels: null,
             croppedUrl: null,
             printSize: null,
+            adjustments: {
+              brightness: 100,
+              contrast: 100,
+              saturation: 100,
+              grayscale: 0,
+            },
           },
         };
         return image;
@@ -62,7 +68,6 @@ export default function UploadButton({
     "image/jpeg": [".jpeg"],
     "image/png": [".png"],
     "image/heic": [".heic"],
-    "image/pdf": [".pdf"],
   };
   return (
     <>

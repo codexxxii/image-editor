@@ -4,7 +4,7 @@ import MaxWidthWrapper from "./max-width-wrapper";
 import { useState } from "react";
 import Cropper from "react-easy-crop";
 import { type Point, type Area } from "react-easy-crop";
-import { PRINT_SIZES } from "@/lib/utils";
+import { cn, PRINT_SIZES } from "@/lib/utils";
 import { DotIcon, XIcon } from "lucide-react";
 import { exportImages, getCroppedImage } from "@/lib/helpers";
 import { toast } from "sonner";
@@ -21,6 +21,7 @@ export default function Editor() {
   const [brightness, setBrightness] = useState(100);
   const [saturation, setSaturation] = useState(100);
   const [contrast, setContrast] = useState(100);
+  const [grayscale, setGrayscale] = useState(0);
 
   const onCropComplete = (_: Area, croppedAreaPixels: Area) => {
     setCroppedAreaPixels(croppedAreaPixels);
@@ -48,6 +49,7 @@ export default function Editor() {
         brightness,
         contrast,
         saturation,
+        grayscale,
       },
     );
 
@@ -64,6 +66,7 @@ export default function Editor() {
               brightness,
               contrast,
               saturation,
+              grayscale,
             },
           },
         };
@@ -127,7 +130,9 @@ export default function Editor() {
               filter: `
               brightness(${brightness}%)
               contrast(${contrast}%)
-              saturate(${saturation}%)`,
+              saturate(${saturation}%)
+              grayscale(${grayscale}%)
+              `,
             },
           }}
         />
@@ -158,6 +163,17 @@ export default function Editor() {
           </button>
 
           <DotIcon className="hidden md:block" />
+          <button
+            className={cn(
+              "w-full sm:w-auto",
+              grayscale === 100 ? "bg-black text-white" : "bg-gray-100",
+            )}
+            onClick={() => setGrayscale((prev) => (prev === 0 ? 100 : 0))}
+          >
+            Grayscale
+          </button>
+
+          <DotIcon className="hidden md:block" />
 
           <div className="flex w-full sm:w-auto items-center gap-2">
             <p className="shrink-0">Zoom:</p>
@@ -172,6 +188,7 @@ export default function Editor() {
               onChange={(e) => setZoom(Number(e.target.value))}
             />
           </div>
+          <DotIcon className="hidden md:block" />
           <div className="flex w-full sm:w-auto items-center gap-2">
             <p className="shrink-0">Brightness:</p>
             <input
@@ -184,6 +201,7 @@ export default function Editor() {
               onChange={(e) => setBrightness(Number(e.target.value))}
             />
           </div>
+          <DotIcon className="hidden md:block" />
           <div className="flex w-full sm:w-auto items-center gap-2">
             <p className="shrink-0">Contrast:</p>
 
@@ -197,6 +215,7 @@ export default function Editor() {
               onChange={(e) => setContrast(Number(e.target.value))}
             />
           </div>
+          <DotIcon className="hidden md:block" />
           <div className="flex w-full sm:w-auto items-center gap-2">
             <p className="shrink-0">Saturation:</p>
 

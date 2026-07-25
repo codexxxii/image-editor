@@ -22,6 +22,7 @@ export type Image = {
       brightness: number;
       contrast: number;
       saturation: number;
+      grayscale: number;
     };
   };
 };

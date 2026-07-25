@@ -17,7 +17,12 @@ function createImage(src: string): Promise<HTMLImageElement> {
 export async function getCroppedImage(
   imageSrc: string,
   crop: Area,
-  adjustments: { brightness: number; contrast: number; saturation: number },
+  adjustments: {
+    brightness: number;
+    contrast: number;
+    saturation: number;
+    grayscale: number;
+  },
 ): Promise<string> {
   const image = await createImage(imageSrc);
 
@@ -33,6 +38,7 @@ export async function getCroppedImage(
     brightness(${adjustments.brightness}%)
     contrast(${adjustments.contrast}%)
     saturate(${adjustments.saturation}%)
+    grayscale(${adjustments.grayscale}%)
   `;
 
   ctx.drawImage(
