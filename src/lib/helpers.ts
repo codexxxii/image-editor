@@ -1,7 +1,7 @@
 import { type Area } from "react-easy-crop";
 import type { Image } from "./use-context";
 
-const DPI = 300;
+const DPI = 96;
 
 function createImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
