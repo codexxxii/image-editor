@@ -78,6 +78,7 @@ export async function exportImage(image: Image): Promise<Blob> {
   brightness(${adjustments.brightness}%)
   contrast(${adjustments.contrast}%)
   saturate(${adjustments.saturation}%)
+  grayscale(${adjustments.grayscale}%)
 `;
 
   cropCtx.drawImage(
